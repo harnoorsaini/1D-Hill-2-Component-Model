@@ -1,11 +1,9 @@
 %% 1D Muscle Model based on the *Hill* 2-Element Model
 
 clear all
+addpath(genpath('../'));
 %% Model Overview
 %  
-% 
-% 
-% <<schematic.PNG>>
 % 
 % Schematic taken from citestartAnderson2007citeend.
 % 
@@ -22,7 +20,7 @@ sploty = 0;
 
 L_REST = 0.5; %mm
 F_MAX = 5; %N
-V_MAX = 1.5; %mm/s
+V_MAX = -1.5; %mm/s
 %% 
 % $a$ and $b$ are shape constants for the muscle force-velocity relationship
 
@@ -43,10 +41,8 @@ b = a*V_MAX/F_MAX;
 % 
 % Parameter $c$ is introduced to tune the shape of the curve. 
 
-c = 0.01;
-d = 10;
 L_TOT = (0:0.001:L_REST*1.5);
-F_PE = F_MAX*c*(exp(d*(L_TOT/L_REST-1))-1);
+F_PE = parallel_elastic(L_TOT, L_REST, F_MAX);
 
 xvec = L_TOT;
 yvec = F_PE;
@@ -72,10 +68,8 @@ plotxy(xvec, yvec, fnum, ftitle, xtitle, ytitle, opt_grid, opt_hold, ...
 % 
 % where $a$ and $b$ have been fit to $V_{MAX}$ and $F_{MAX}$.
 
-V = 0:0.01:1.1*V_MAX;
-F_VEL = a*(V_MAX-V)./(b+V);
-% normalize the F-v relationship to maximum force
-F_VEL = F_VEL/F_MAX;
+V = 0:-0.01:-1.1*V_MAX;
+F_VEL = force_vel(V_MAX, V, F_MAX,a ,b);
 
 xvec = V;
 yvec = F_VEL;
@@ -93,14 +87,8 @@ plotxy(xvec, yvec, fnum, ftitle, xtitle, ytitle, opt_grid, opt_hold, ...
 % 
 % where $Q = L_{CE}/L_{REST}$ and$SK$ is a material parameter.
 
-SK = 0.25;
-% L_TOT is defined above, the same definition is used here
-Q = L_TOT/L_REST;
-F_LEN = F_MAX*exp(-((Q-1)/SK).^2);
-% normalise the F-l relationship to max force
-F_LEN = F_LEN/F_MAX;
+F_LEN = force_length(L_TOT, L_REST, F_MAX);
 
-L_TOT = (0:0.001:L_REST*1.5);
 xvec = L_TOT;
 yvec = F_LEN;
 ftitle = 'Force-length Relationship of F_{CE}';
@@ -127,29 +115,17 @@ plotxy(xvec, yvec, fnum, ftitle, xtitle, ytitle, opt_grid, opt_hold, ...
 % 
 % Now, consider the muscle shortening at a constant velocity.
 
-for i = 0:0.1:V_MAX
-    V = (i/10)*V_MAX;
-    F_VEL = a*(V_MAX-V)./(F_MAX*(b+V));
-    Q = L_TOT/L_REST;
-    F_LEN = exp(-((Q-1)/SK).^2);
-    F_CE = F_MAX*F_VEL*F_LEN;
-    F_PE = F_MAX*c*(exp(d*(L_TOT/L_REST-1))-1);
-    F_MUSC = F_CE + max(F_PE,0);
-    
-    xvec = L_TOT;
-    yvec = F_MUSC;
-    ftitle = 'Force of F_{MUSC}';
-    xtitle = 'L_{TOT} (mm)';
-    ytitle = 'F_{MUSC}(N)';
-    opt_hold = 'on';
-    plotxy(xvec, yvec, fnum, ftitle, xtitle, ytitle, opt_grid, opt_hold, ...
-        splotx, sploty)
-    
-end
-%% 
-% Isometric Contraction
-% 
-% Now, consider an isometric contraction, that is, velocity = 0. How does 
-% the force evolve over time?
+% activation
+alpha = 1;
+% loading velocity
+V = 0.25*V_MAX;
+F_MUSC = force_muscle(L_TOT, L_REST, V_MAX, V, a, b, F_MAX, alpha);
 
-V = 0;
+xvec = L_TOT;
+yvec = F_MUSC;
+ftitle = 'Force of F_{MUSC}';
+xtitle = 'L_{TOT} (mm)';
+ytitle = 'F_{MUSC}(N)';
+opt_hold = 'off';
+plotxy(xvec, yvec, fnum, ftitle, xtitle, ytitle, opt_grid, opt_hold, ...
+    splotx, sploty)
