@@ -67,9 +67,21 @@ plotxy(xvec, yvec, fnum, ftitle, xtitle, ytitle, opt_grid, opt_hold, ...
 % $$F_{VEL} = \frac{a(V_{MAX}-V)}{(b-V)}$$
 % 
 % where $a$ and $b$ have been fit to $V_{MAX}$ and $F_{MAX}$.
+% 
+% Note that velocity is taken as negative when the muscle is shortening, 
+% i.e. concentric contractions. To account for eccentric contractions a temporary 
+% adjustment is made. When velocity is positive:
+% 
+% $$F_{VEL} = \frac{F_{MAX}^{ECC}-F_{MAX}}{|V_{MAX}|}\times V + F_{MAX}$$
+% 
+% Where $F_{MAX}^{ECC} > F_{MAX}$ is the force under eccentric contraction. 
+% And the steepness of the curve is defined such that $F_{MAX}^{ECC}$ is reached 
+% at $|V_{MAX}|$.
 
-V = 0:-0.01:-1.1*V_MAX;
-F_VEL = force_vel(V_MAX, V, F_MAX,a ,b);
+V = -1.5*V_MAX:-0.01:1.5*V_MAX;
+F_MAXECC = 1.2*F_MAX;
+
+F_VEL = force_vel(V_MAX, V, F_MAX,a ,b, F_MAXECC);
 
 xvec = V;
 yvec = F_VEL;

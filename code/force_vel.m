@@ -1,11 +1,14 @@
-function F_VEL = force_vel(V_MAX, V, F_MAX,a , b, F_MAXECC)
-    
+function F_VEL = force_vel(V_MAX, V, F_MAX,F_MAXECC)
+    % muscle model constants are computed for the *current* F_{MAX}
+    a = 0.25;
+    b = a*V_MAX/F_MAX;
+
     vSteps = length(V);
     F_VEL(vSteps) = zeros;
     for i = 1:vSteps
-        if V(i) > 0 % eccentric
+        if V(i) > 0 % ECCENTRIC - DYNAMIC FORCE ENHANCEMENT
             F_VEL(i) = (F_MAXECC-F_MAX)/abs(V_MAX) * V(i) + F_MAX;
-        else % isometric/concentric
+        else % ISOMETRIC + CONCENTRIC
             F_VEL(i) = a*(V_MAX-V(i))./(b+V(i));
         end
         % normalize the F-v relationship to maximum force
