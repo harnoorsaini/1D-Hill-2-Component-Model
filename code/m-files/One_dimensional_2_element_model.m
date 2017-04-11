@@ -21,12 +21,7 @@ sploty = 0;
 L_REST = 0.5; %mm
 F_MAX = 5; %N
 V_MAX = -1.5; %mm/s
-%% 
-% $a$ and $b$ are shape constants for the muscle force-velocity relationship
 
-% muscle model constants
-a = 0.25;
-b = a*V_MAX/F_MAX;
 %% Parallel elastic element
 % This element represents the passive response of the muscle upon streching 
 % greater than resting length.
@@ -42,7 +37,7 @@ b = a*V_MAX/F_MAX;
 % Parameter $c$ is introduced to tune the shape of the curve. 
 
 L_TOT = (0:0.001:L_REST*1.5);
-F_PE = parallel_elastic(L_TOT, L_REST, F_MAX);
+F_PE = parallel_elastic(L_TOT, L_REST);
 
 xvec = L_TOT;
 yvec = F_PE;
@@ -67,7 +62,14 @@ plotxy(xvec, yvec, fnum, ftitle, xtitle, ytitle, opt_grid, opt_hold, ...
 % $$F_{VEL} = \frac{a(V_{MAX}-V)}{(b-V)}$$
 % 
 % where $a$ and $b$ have been fit to $V_{MAX}$ and $F_{MAX}$.
-% 
+% The shape parameters for the force-velocity relationship are
+% computed with the $F_{MAX}$ such that;
+%
+% $$b = a\times V_{MAX}/F_{MAX}$$
+%
+% where $a=0.25$ is defined. This assures that the force-velocity
+% relationship always gives $F_{MAX}$ when $V=0$.
+%
 % Note that velocity is taken as negative when the muscle is shortening, 
 % i.e. concentric contractions. To account for eccentric contractions a temporary 
 % adjustment is made. When velocity is positive:
@@ -81,7 +83,7 @@ plotxy(xvec, yvec, fnum, ftitle, xtitle, ytitle, opt_grid, opt_hold, ...
 V = -1.5*V_MAX:-0.01:1.5*V_MAX;
 F_MAXECC = 1.2*F_MAX;
 
-F_VEL = force_vel(V_MAX, V, F_MAX,a ,b, F_MAXECC);
+F_VEL = force_vel(V_MAX, V, F_MAX, F_MAXECC);
 
 xvec = V;
 yvec = F_VEL;
@@ -99,7 +101,7 @@ plotxy(xvec, yvec, fnum, ftitle, xtitle, ytitle, opt_grid, opt_hold, ...
 % 
 % where $Q = L_{CE}/L_{REST}$ and$SK$ is a material parameter.
 
-F_LEN = force_length(L_TOT, L_REST, F_MAX);
+F_LEN = force_length(L_TOT, L_REST);
 
 xvec = L_TOT;
 yvec = F_LEN;
@@ -131,7 +133,7 @@ plotxy(xvec, yvec, fnum, ftitle, xtitle, ytitle, opt_grid, opt_hold, ...
 alpha = 1;
 % loading velocity
 V = 0.25*V_MAX;
-F_MUSC = force_muscle(L_TOT, L_REST, V_MAX, V, a, b, F_MAX, alpha);
+F_MUSC = force_muscle(L_TOT, L_REST, V_MAX, V, F_MAX, alpha, F_MAXECC);
 
 xvec = L_TOT;
 yvec = F_MUSC;

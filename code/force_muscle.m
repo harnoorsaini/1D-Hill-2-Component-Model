@@ -3,7 +3,7 @@ function [F_MUSC,F_ACT,F_PASS] = force_muscle(L_TOT, L_REST, V_MAX, V, F_MAX, al
     % force-length relationship 
     F_LEN = force_length(L_TOT, L_REST);
     % force-velocity relationship
-    F_VEL = force_vel(V_MAX, V, F_MAX,F_MAXECC, L_TOT, L_REST);
+    F_VEL = force_vel(V_MAX, V, F_MAX,F_MAXECC);
     % total 
     F_CE = alpha*F_LEN*F_VEL;
     F_ACT = F_MAX*F_CE;

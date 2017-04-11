@@ -1,4 +1,4 @@
-function F_VEL = force_vel(V_MAX, V, F_MAX,F_MAXECC, L_TOT, L_REST)
+function F_VEL = force_vel(V_MAX, V, F_MAX,F_MAXECC)
     % muscle model constants are computed for the *current* F_{MAX}
     a = 0.25;
     b = a*V_MAX/F_MAX;
